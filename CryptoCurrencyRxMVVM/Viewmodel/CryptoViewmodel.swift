@@ -9,6 +9,7 @@ import Foundation
 import RxSwift
 import RxCocoa
 
+
 class CryptoViewmodel {
     
     let cyptos : PublishSubject<[Crypto]> = PublishSubject()
