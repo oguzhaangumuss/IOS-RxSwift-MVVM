@@ -6,28 +6,54 @@
 //
 
 import UIKit
-
+import RxSwift
+import RxCocoa
 class ViewController: UIViewController,UITableViewDataSource,UITableViewDelegate {
 
     @IBOutlet weak var tableview: UITableView!
+    let cryptoVM = CryptoViewmodel()
+    let disposeBag = DisposeBag()
+    
+    var cryptoList = [Crypto]()
+    
     override func viewDidLoad() {
+        super.viewDidLoad()
+
         tableview.delegate = self
         tableview.dataSource = self
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        setupBinding()
+        cryptoVM.RequestData()
+        
+        
+
+    }
+    private func setupBinding(){
+        cryptoVM
+            .error
+            .observe(on: MainScheduler.asyncInstance)
+            .subscribe { errorString in
+                print(errorString)
+            } .disposed(by:disposeBag) // -String- Variable that returns from func
+        cryptoVM
+            .cyptos
+            .observe(on: MainScheduler.asyncInstance)
+            .subscribe { cryptos in
+                self.cryptoList = cryptos
+                self.tableview.reloadData()
+            }
     }
 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
         var content = cell.defaultContentConfiguration()
-        content.text = "Crypto Currency"
-        content.secondaryText = "Crpyto Price"
+        content.text = cryptoList[indexPath.row].currency
+        content.secondaryText = cryptoList[indexPath.row].price
         cell.contentConfiguration = content
         return cell
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return cryptoList.count
     }
 
 }
